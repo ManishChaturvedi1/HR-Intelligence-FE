@@ -5,7 +5,7 @@ import {
   Activity, Target, CheckCircle, TrendingUp, BarChart2, LogOut
 } from 'lucide-react';
 import { useAuth } from './AuthContext.jsx';
-import Login from './Login.jsx';
+import { SignIn } from '@clerk/clerk-react';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
   Tooltip, ResponsiveContainer, CartesianGrid, Legend,
@@ -32,9 +32,9 @@ const AXIS_STYLE = { fontSize: 11, fill: '#94A3B8', fontFamily: 'Inter, sans-ser
 // SIDEBAR NAV DATA
 // ============================================================
 const NAV_ITEMS = [
-  { id: 'analytics', label: 'Dashboard',         icon: LayoutDashboard },
-  { id: 'employees', label: 'Employees',          icon: Users },
-  { id: 'predict',   label: 'New Prediction',     icon: PlusCircle },
+  { id: 'analytics', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'employees', label: 'Employees', icon: Users },
+  { id: 'predict', label: 'New Prediction', icon: PlusCircle },
 ];
 
 // ============================================================
@@ -87,9 +87,9 @@ function Sidebar({ active, onNavigate, collapsed, onToggle }) {
 function Navbar({ activeTab }) {
   const { user, logout } = useAuth();
   const titles = {
-    analytics: { title: 'Dashboard Overview',  sub: 'Company-wide attrition analytics & demographics' },
-    employees:  { title: 'Employee Directory', sub: 'Browse and review predicted attrition by employee' },
-    predict:    { title: 'New Prediction',      sub: 'Predict attrition risk for a new employee entry' },
+    analytics: { title: 'Dashboard Overview', sub: 'Company-wide attrition analytics & demographics' },
+    employees: { title: 'Employee Directory', sub: 'Browse and review predicted attrition by employee' },
+    predict: { title: 'New Prediction', sub: 'Predict attrition risk for a new employee entry' },
   };
   const { title, sub } = titles[activeTab] || {};
 
@@ -103,7 +103,7 @@ function Navbar({ activeTab }) {
         {user && (
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--clr-text)' }}>{user.name}</div>
-            <div style={{ fontSize: 10, color: 'var(--clr-text-muted)' }}>{user.org_name} · {user.role.toUpperCase()}</div>
+            <div style={{ fontSize: 10, color: 'var(--clr-text-muted)' }}>{user.email}</div>
           </div>
         )}
         <div className="navbar__badge">
@@ -207,7 +207,7 @@ function PredictForm({ onPredictionComplete }) {
   const [error, setError] = useState(null);
 
   const NUMBER_FIELDS = ['age', 'salary', 'years_at_company', 'job_satisfaction',
-                         'work_life_balance', 'performance_rating', 'last_promotion_years'];
+    'work_life_balance', 'performance_rating', 'last_promotion_years'];
 
   const handle = (e) => {
     const { name, value, type, checked } = e.target;
@@ -241,7 +241,7 @@ function PredictForm({ onPredictionComplete }) {
         <div className="card p-6">
           <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div className="grid-2" style={{ gap: 14 }}>
-              <Field label="Full Name"     {...f('name')}  required placeholder="e.g. Alok Sharma" />
+              <Field label="Full Name"     {...f('name')} required placeholder="e.g. Alok Sharma" />
               <Field label="Email Address" {...f('email')} type="email" required placeholder="alok@company.com" />
             </div>
             <div className="grid-2" style={{ gap: 14 }}>
@@ -264,7 +264,7 @@ function PredictForm({ onPredictionComplete }) {
               <Field label="Years at Company"   {...f('years_at_company')} type="number" min="0" max="40" step="1" required />
             </div>
             <div className="grid-2" style={{ gap: 14 }}>
-              <Field label="Job Satisfaction (1–4)"  {...f('job_satisfaction')}  type="number" min="1" max="4" step="1" required />
+              <Field label="Job Satisfaction (1–4)"  {...f('job_satisfaction')} type="number" min="1" max="4" step="1" required />
               <Field label="Work-Life Balance (1–4)"  {...f('work_life_balance')} type="number" min="1" max="4" step="1" required />
             </div>
             <div className="grid-2" style={{ gap: 14, alignItems: 'end' }}>
@@ -362,7 +362,7 @@ function PredictForm({ onPredictionComplete }) {
 
               {/* Factors & Reasons */}
               <div style={{ padding: '12px', background: result.attrition_risk ? 'var(--clr-danger-muted)' : 'var(--clr-success-muted)', borderRadius: 'var(--radius-sm)', border: `1px solid ${result.attrition_risk ? 'var(--clr-danger)' : 'var(--clr-success)'}40` }}>
-                <div className="text-xs font-semibold" style={{ color: result.attrition_risk ? 'var(--clr-danger)' : 'var(--clr-success)'}}>
+                <div className="text-xs font-semibold" style={{ color: result.attrition_risk ? 'var(--clr-danger)' : 'var(--clr-success)' }}>
                   {result.attrition_risk ? 'Identified Risk Factors' : 'Stabilizing Factors'}
                 </div>
                 <ReasonsList reasonsStr={result.reasons} />
@@ -384,21 +384,21 @@ function PredictForm({ onPredictionComplete }) {
 // BULK CSV UPLOAD COMPONENT
 // ============================================================
 const CSV_TEMPLATE_HEADERS = [
-  'Name','Email','Age','Gender','Department','JobRole',
-  'MonthlyIncome','YearsAtCompany','JobSatisfaction',
-  'WorkLifeBalance','OverTime','PerformanceRating','YearsSinceLastPromotion'
+  'Name', 'Email', 'Age', 'Gender', 'Department', 'JobRole',
+  'MonthlyIncome', 'YearsAtCompany', 'JobSatisfaction',
+  'WorkLifeBalance', 'OverTime', 'PerformanceRating', 'YearsSinceLastPromotion'
 ];
 const CSV_TEMPLATE_ROW = [
-  'Alok Sharma','alok@acme.com','32','Male','Research & Development',
-  'Research Scientist','6000','4','3','3','No','3','2'
+  'Alok Sharma', 'alok@acme.com', '32', 'Male', 'Research & Development',
+  'Research Scientist', '6000', '4', '3', '3', 'No', '3', '2'
 ];
 
 function BulkUpload() {
-  const [file, setFile]       = useState(null);
-  const [dragging, setDrag]   = useState(false);
+  const [file, setFile] = useState(null);
+  const [dragging, setDrag] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [result, setResult]   = useState(null);
-  const [error, setError]     = useState('');
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
 
   const pickFile = (f) => {
     if (!f || !f.name.endsWith('.csv')) { setError('Please select a .csv file.'); return; }
@@ -450,8 +450,10 @@ function BulkUpload() {
             <div className="text-xs font-semibold text-secondary mb-2">Required columns:</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {CSV_TEMPLATE_HEADERS.map(h => (
-                <span key={h} style={{ fontSize: 10, padding: '2px 7px', background: 'var(--clr-accent-muted)',
-                  color: 'var(--clr-accent)', borderRadius: 4, fontFamily: 'monospace' }}>{h}</span>
+                <span key={h} style={{
+                  fontSize: 10, padding: '2px 7px', background: 'var(--clr-accent-muted)',
+                  color: 'var(--clr-accent)', borderRadius: 4, fontFamily: 'monospace'
+                }}>{h}</span>
               ))}
             </div>
             <div className="text-xs text-muted" style={{ marginTop: 6 }}>OverTime: Yes/No · Ratings: 1–4</div>
@@ -482,9 +484,11 @@ function BulkUpload() {
           </div>
 
           {error && (
-            <div style={{ padding: '9px 12px', background: 'var(--clr-danger-muted)',
+            <div style={{
+              padding: '9px 12px', background: 'var(--clr-danger-muted)',
               border: '1px solid var(--clr-danger)', borderRadius: 'var(--radius-sm)',
-              color: 'var(--clr-danger)', fontSize: 12 }}>{error}</div>
+              color: 'var(--clr-danger)', fontSize: 12
+            }}>{error}</div>
           )}
 
           <button className="btn btn--primary btn--full" onClick={upload}
@@ -519,23 +523,27 @@ function BulkUpload() {
                 {[
                   { label: 'Processed', val: result.processed, clr: 'var(--clr-accent)' },
                   { label: 'High Risk', val: result.high_risk, clr: 'var(--clr-danger)' },
-                  { label: 'Low Risk',  val: result.low_risk,  clr: 'var(--clr-success)' },
-                  { label: 'Errors',    val: result.errors,    clr: 'var(--clr-warning)' },
+                  { label: 'Low Risk', val: result.low_risk, clr: 'var(--clr-success)' },
+                  { label: 'Errors', val: result.errors, clr: 'var(--clr-warning)' },
                 ].map(({ label, val, clr }) => (
-                  <div key={label} style={{ textAlign: 'center', padding: '10px 4px',
-                    background: 'var(--clr-bg)', borderRadius: 'var(--radius-sm)' }}>
+                  <div key={label} style={{
+                    textAlign: 'center', padding: '10px 4px',
+                    background: 'var(--clr-bg)', borderRadius: 'var(--radius-sm)'
+                  }}>
                     <div style={{ fontSize: 20, fontWeight: 700, color: clr }}>{val}</div>
                     <div className="text-xs text-muted">{label}</div>
                   </div>
                 ))}
               </div>
-              <div style={{ maxHeight: 320, overflowY: 'auto', borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--clr-border)' }}>
+              <div style={{
+                maxHeight: 320, overflowY: 'auto', borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--clr-border)'
+              }}>
                 <table className="data-table" style={{ fontSize: 12 }}>
                   <thead>
                     <tr><th>Row</th><th>Name</th><th>Role</th>
                       <th>Key Factors</th>
-                      <th style={{ textAlign:'center' }}>Risk</th><th style={{ textAlign:'right' }}>Prob.</th></tr>
+                      <th style={{ textAlign: 'center' }}>Risk</th><th style={{ textAlign: 'right' }}>Prob.</th></tr>
                   </thead>
                   <tbody>
                     {result.results.map(r => (
@@ -561,22 +569,22 @@ function BulkUpload() {
                                   </div>
                                 );
                               }
-                            } catch(e) {}
+                            } catch (e) { }
                             return <div className="text-xs text-secondary" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.reasons}</div>;
                           })()}
                         </td>
-                        <td style={{ textAlign:'center' }}><span className={`badge ${r.attrition_risk ? 'badge--danger':'badge--success'}`}>
-                          {r.attrition_risk ? 'High':'Low'}</span></td>
-                        <td style={{ textAlign:'right' }}>
-                          <span style={{ fontWeight: 600, color: r.attrition_risk ? 'var(--clr-danger)':'var(--clr-success)' }}>
+                        <td style={{ textAlign: 'center' }}><span className={`badge ${r.attrition_risk ? 'badge--danger' : 'badge--success'}`}>
+                          {r.attrition_risk ? 'High' : 'Low'}</span></td>
+                        <td style={{ textAlign: 'right' }}>
+                          <span style={{ fontWeight: 600, color: r.attrition_risk ? 'var(--clr-danger)' : 'var(--clr-success)' }}>
                             {r.probability}%</span>
                         </td>
                       </tr>
                     ))}
                     {result.error_details?.map(e => (
-                      <tr key={`err-${e.row}`} style={{ background:'var(--clr-danger-muted)' }}>
+                      <tr key={`err-${e.row}`} style={{ background: 'var(--clr-danger-muted)' }}>
                         <td className="text-muted">{e.row}</td>
-                        <td colSpan={5} style={{ color:'var(--clr-danger)', fontSize:11 }}>⚠ {e.error}</td>
+                        <td colSpan={5} style={{ color: 'var(--clr-danger)', fontSize: 11 }}>⚠ {e.error}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -610,7 +618,105 @@ function PredictPage({ onPredictionComplete }) {
       </div>
 
       {mode === 'single' && <PredictForm onPredictionComplete={onPredictionComplete} />}
-      {mode === 'bulk'   && <BulkUpload />}
+      {mode === 'bulk' && <BulkUpload />}
+    </div>
+  );
+}
+
+// ============================================================
+// EMPLOYEE DETAIL MODAL
+// ============================================================
+function EmployeeDetail({ employee, onClose }) {
+  if (!employee) return null;
+  const pred = employee.predictions?.slice(-1)[0] ?? null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 42, height: 42, background: 'var(--clr-bg-dark)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--clr-accent)', fontWeight: 700 }}>
+              {employee.name ? employee.name.charAt(0) : '#'}
+            </div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--clr-text)' }}>{employee.name || 'Anonymous Employee'}</div>
+              <div style={{ fontSize: 12, color: 'var(--clr-text-muted)' }}>{employee.email}</div>
+            </div>
+          </div>
+          <button className="modal-close" onClick={onClose}>&times;</button>
+        </div>
+
+        <div className="modal-body">
+          {/* Prediction Summary if available */}
+          {pred && (
+            <div className="card p-5 mb-6" style={{ background: pred.attrition_risk ? 'var(--clr-danger-muted)' : 'var(--clr-success-muted)', border: 'none' }}>
+              <div className="flex-between mb-4">
+                <div>
+                  <div className="detail-label" style={{ color: pred.attrition_risk ? 'var(--clr-danger)' : 'var(--clr-success)' }}>Prediction Result</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: pred.attrition_risk ? 'var(--clr-danger)' : 'var(--clr-success)' }}>
+                    {pred.attrition_risk ? 'High Attrition Risk' : 'Retained / Low Risk'}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="detail-label" style={{ color: pred.attrition_risk ? 'var(--clr-danger)' : 'var(--clr-success)' }}>Confidence</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: pred.attrition_risk ? 'var(--clr-danger)' : 'var(--clr-success)' }}>{Math.round(pred.probability * 100)}%</div>
+                </div>
+              </div>
+              <ReasonsList reasonsStr={pred.reasons} />
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+            <div className="detail-grid">
+              <div className="detail-item">
+                <span className="detail-label">Department</span>
+                <span className="detail-value">{employee.department}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Role</span>
+                <span className="detail-value">{employee.job_role}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Monthly Salary</span>
+                <span className="detail-value">${employee.salary?.toLocaleString()}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Age / Gender</span>
+                <span className="detail-value">{employee.age} yrs · {employee.gender}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Tenure</span>
+                <span className="detail-value">{employee.years_at_company} years at company</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Promotion</span>
+                <span className="detail-value">{employee.last_promotion_years} years since last promotion</span>
+              </div>
+            </div>
+
+            <div style={{ background: 'var(--clr-bg)', padding: 16, borderRadius: 'var(--radius-md)', border: '1px solid var(--clr-border)' }}>
+              <div className="detail-label mb-4">Sentiment Metrics</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <div className="flex-between mb-1"><span className="text-xs">Job Satisfaction</span><span className="text-xs font-bold">{employee.job_satisfaction}/4</span></div>
+                  <div className="progress-bar-track"><div className="progress-bar-fill" style={{ width: `${(employee.job_satisfaction / 4) * 100}%`, background: 'var(--clr-accent)' }} /></div>
+                </div>
+                <div>
+                  <div className="flex-between mb-1"><span className="text-xs">Work-Life Balance</span><span className="text-xs font-bold">{employee.work_life_balance}/4</span></div>
+                  <div className="progress-bar-track"><div className="progress-bar-fill" style={{ width: `${(employee.work_life_balance / 4) * 100}%`, background: 'var(--clr-accent)' }} /></div>
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <span className="badge badge--neutral">Overtime: {employee.overtime ? 'Required' : 'None'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ padding: '16px 24px', background: 'var(--clr-bg)', borderTop: '1px solid var(--clr-border)', display: 'flex', justifyContent: 'flex-end' }}>
+          <button className="btn btn--outline" onClick={onClose}>Close Overview</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -622,11 +728,12 @@ function EmployeeList() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedEmp, setSelectedEmp] = useState(null);
 
   // Filter & pagination state
-  const [search, setSearch]     = useState('');
-  const [deptFilter, setDept]   = useState('All');
-  const [riskFilter, setRisk]   = useState('All');
+  const [search, setSearch] = useState('');
+  const [deptFilter, setDept] = useState('All');
+  const [riskFilter, setRisk] = useState('All');
   const [pageSize, setPageSize] = useState(25);
 
   useEffect(() => {
@@ -646,7 +753,7 @@ function EmployeeList() {
     const deptMatch = deptFilter === 'All' || emp.department === deptFilter;
     const riskMatch = riskFilter === 'All'
       || (riskFilter === 'High' && pred?.attrition_risk)
-      || (riskFilter === 'Low'  && pred && !pred.attrition_risk)
+      || (riskFilter === 'Low' && pred && !pred.attrition_risk)
       || (riskFilter === 'Pending' && !pred);
     return nameMatch && deptMatch && riskMatch;
   });
@@ -676,7 +783,7 @@ function EmployeeList() {
             />
             <svg style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}
               width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
           </div>
         </div>
@@ -754,7 +861,7 @@ function EmployeeList() {
                 {shown.map((emp, idx) => {
                   const pred = emp.predictions?.slice(-1)[0] ?? null;
                   return (
-                    <tr key={emp.id}>
+                    <tr key={emp.id} onClick={() => setSelectedEmp(emp)}>
                       <td className="text-muted text-xs">{idx + 1}</td>
                       <td>
                         <div className="font-medium">{emp.name || `Employee #${emp.id}`}</div>
@@ -767,8 +874,8 @@ function EmployeeList() {
                       <td>
                         {pred
                           ? <span className={`badge ${pred.attrition_risk ? 'badge--danger' : 'badge--success'}`}>
-                              {pred.attrition_risk ? 'High Risk' : 'Low Risk'}
-                            </span>
+                            {pred.attrition_risk ? 'High Risk' : 'Low Risk'}
+                          </span>
                           : <span className="badge badge--neutral">Pending</span>
                         }
                       </td>
@@ -800,6 +907,11 @@ function EmployeeList() {
             </div>
           </div>
         )}
+
+        <EmployeeDetail
+          employee={selectedEmp}
+          onClose={() => setSelectedEmp(null)}
+        />
       </div>
     </div>
   );
@@ -912,7 +1024,7 @@ function AnalyticsDashboard() {
               <YAxis tick={AS} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={TS} />
               <Legend wrapperStyle={{ fontSize: 12, color: 'var(--clr-text-secondary)', fontFamily: 'Inter' }} />
-              <Bar dataKey="Low Risk"  stackId="a" fill="#059669" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="Low Risk" stackId="a" fill="#059669" radius={[0, 0, 0, 0]} />
               <Bar dataKey="High Risk" stackId="a" fill="#DC2626" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -927,7 +1039,7 @@ function AnalyticsDashboard() {
               <YAxis tick={AS} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={TS} />
               <Legend wrapperStyle={{ fontSize: 12, color: 'var(--clr-text-secondary)', fontFamily: 'Inter' }} />
-              <Bar dataKey="Low Risk"  stackId="a" fill="#2563EB" />
+              <Bar dataKey="Low Risk" stackId="a" fill="#2563EB" />
               <Bar dataKey="High Risk" stackId="a" fill="#DC2626" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -950,7 +1062,7 @@ function AnalyticsDashboard() {
               <XAxis type="number" dataKey="tenure" name="Years at Company" tick={AS} axisLine={false} tickLine={false} label={{ value: 'Tenure (yrs)', position: 'insideBottom', offset: -2, style: { fontSize: 10, fill: '#94A3B8' } }} />
               <YAxis type="number" dataKey="salary" name="Monthly Salary" tick={AS} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={TS} />
-              <Scatter name="Low Risk"  data={stats.scatter.filter(d => d.risk === 0)} fill="#059669" opacity={0.5} />
+              <Scatter name="Low Risk" data={stats.scatter.filter(d => d.risk === 0)} fill="#059669" opacity={0.5} />
               <Scatter name="High Risk" data={stats.scatter.filter(d => d.risk === 1)} fill="#DC2626" opacity={0.6} />
             </ScatterChart>
           </ResponsiveContainer>
@@ -992,7 +1104,13 @@ export default function App() {
     );
   }
 
-  if (!user) return <Login />;
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--clr-bg-dark)' }}>
+        <SignIn routing="hash" forceRedirectUrl="/" />
+      </div>
+    );
+  }
 
   return (
     <div className="shell">
@@ -1008,7 +1126,7 @@ export default function App() {
         <main className="content">
           {activeTab === 'analytics' && <AnalyticsDashboard />}
           {activeTab === 'employees' && <EmployeeList />}
-          {activeTab === 'predict'   && <PredictPage onPredictionComplete={() => setActiveTab('employees')} />}
+          {activeTab === 'predict' && <PredictPage onPredictionComplete={() => setActiveTab('employees')} />}
         </main>
       </div>
     </div>
