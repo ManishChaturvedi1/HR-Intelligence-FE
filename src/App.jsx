@@ -12,7 +12,7 @@ import {
   ScatterChart, Scatter
 } from 'recharts';
 
-const API_URL = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const CHART_COLORS = ['#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777', '#0284C7', '#65A30D'];
 
@@ -419,7 +419,7 @@ function BulkUpload() {
     setLoading(true); setError(''); setResult(null);
     const form = new FormData(); form.append('file', file);
     try {
-      const { data } = await axios.post('http://localhost:8000/predict/bulk', form, {
+      const { data } = await axios.post(`${API_URL}/predict/bulk`, form, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setResult(data);
